@@ -97,7 +97,8 @@ let H3= React.createClass({
 let Pergunta = React.createClass({
   render: function() {
     return <ListItem 
-      leftIcon={<span>{this.props.questao.id}</span>}>
+      leftIcon={<span>{this.props.questao.id}</span>}
+      disabled='true' >
         <p>{this.props.questao.pergunta}</p>
         <RadioButtonGroup name={this.props.questao.id}>
         {["Nunca", "Raramente", "Algumas vezes", "Geralmente", "Sempre"].map(function(index) {

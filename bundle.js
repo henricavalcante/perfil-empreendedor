@@ -221,7 +221,8 @@
 	          'span',
 	          null,
 	          this.props.questao.id
-	        ) },
+	        ),
+	        disabled: 'true' },
 	      React.createElement(
 	        'p',
 	        null,

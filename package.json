@@ -1,0 +1,23 @@
+{
+  "name": "perfil-empreendedor",
+  "version": "1.0.0",
+  "description": "Uma ferramenta que dá o perfil do empreendedor em função do resultado das respostas de um questionário",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Henri Cavalcante",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^5.8.9",
+    "babel-loader": "^5.3.2",
+    "css-loader": "^0.15.6",
+    "style-loader": "^0.12.3",
+    "webpack": "^1.10.5"
+  },
+  "dependencies": {
+    "material-ui": "^0.10.4",
+    "react": "^0.13.3",
+    "react-tap-event-plugin": "^0.1.7"
+  }
+}

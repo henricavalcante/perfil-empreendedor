@@ -101,7 +101,7 @@
 	        ),
 	        React.createElement(
 	          Paper,
-	          { style: { margin: 50, padding: 50 } },
+	          { style: { margin: '5vw', padding: '5vw' } },
 	          React.createElement(
 	            H3,
 	            null,
@@ -115,7 +115,7 @@
 	        ),
 	        React.createElement(
 	          Paper,
-	          { style: { margin: 50, padding: 50 } },
+	          { style: { margin: '5vw', padding: '5vw' } },
 	          React.createElement(
 	            H3,
 	            null,
@@ -173,7 +173,7 @@
 	        ),
 	        React.createElement(
 	          Paper,
-	          { style: { margin: 50, padding: 50 } },
+	          { style: { margin: '5vw', padding: '5vw' } },
 	          React.createElement(
 	            H3,
 	            null,

@@ -46,12 +46,12 @@ let PerfilEmpreendedor = React.createClass({
       }>
         <img src="http://lorempixel.com/600/337/business/"/>
       </CardMedia>
-      <Paper style={{margin: 50, padding: 50}}>
+      <Paper style={{margin: '5vw', padding: '5vw'}}>
         <H3> Apresentação </H3>
         <p> Esta ferramenta visa realizar uma análise do seu perfil empreendedor através de questionamentos, resultando em um autoconhecimento de sua vocação empreendedora, seja empregado ou dono do próprio negócio.</p>
       </Paper>
 
-      <Paper style={{margin: 50, padding: 50}}>
+      <Paper style={{margin: '5vw', padding: '5vw'}}>
         <H3> Instruções </H3>
         <p>O principal objetivo deste questionário, é ajudá-lo a intensificar o seu autoconhecimento.  Não há respostas certas ou erradas. Mas elas, em seu conjunto apontam tendências que podem contribuir para seu aperfeiçoamento como pessoa e profissional. Ninguém é polivalente em todos os campos do conhecimento e do trabalho.</p>
         <p>Responda por isso as perguntas da forma crítica e sincera.</p>
@@ -66,7 +66,7 @@ let PerfilEmpreendedor = React.createClass({
         <p>Mesmo que as afirmativas pareçam similares, elas não são réplicas uma das outras, pois procuram sempre focalizar algum aspecto diferente das demais.</p>
       </Paper>
 
-      <Paper style={{margin: 50, padding: 50}}>
+      <Paper style={{margin: '5vw', padding: '5vw'}}>
       <H3>Questionário</H3>
       <List>
       {

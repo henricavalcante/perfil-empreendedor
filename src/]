@@ -24,19 +24,11 @@ let TableRow = mui.TableRow;
 let TableRowColumn = mui.TableRowColumn;
 let TableBody = mui.TableBody;
 let TableFooter = mui.TableFooter;
-let Dialog = mui.Dialog;
-let TextField = mui.TextField;
 
 let BarChart = require("react-chartjs").Bar;
 
 let questoes = require('./questoes');
 let comp_mask = require('./competencias_mask');
-
-let FireBase = require('firebase');
-let myFireBaseRef = new FireBase('https://brilliant-heat-9005.firebaseio.com');
-
-let queryString = require('query-string');
-let uniqid = require('uniqid');
 
 let PerfilEmpreendedor = React.createClass({
   childContextTypes: {
@@ -55,62 +47,42 @@ let PerfilEmpreendedor = React.createClass({
     });
   },
 
-  modalDismiss: function(){
-    this.refs.modalError.dismiss();  
-  },
-
-  setName: function(){
-    this.state.nome = this.refs.nameInput.getValue();
-    this.state.key  = uniqid();
-     console.log(this.state); 
-    this.refs.modalName.dismiss();
-  },
-
-  getInitialState: function(){
-    let urlData = queryString.parse(location.search);
-    return {
-      msgError: "",
-      nome: urlData.nome,
-      key: urlData.key
-    }
-  },
-
   onFinalizeClick: function(){
 
-    let ans = [];
-    let blanks = [];
-    for(var inp in document.questionario.elements){
-      if(inp.match(/^questao_/)){
+    let value;
+    let qIndex;
+    let factor = 0;
 
-        if(!document.questionario.elements[inp].value){
-            blanks.push(inp.replace('questao_',' '));
-            continue;      
-        }
+    for(var m in comp_mask.fatMask){
+      qIndex = comp_mask.fatMask[m];
 
-        ans.push(document.questionario.elements[inp].value );
+      value = Math.sign(qIndex)*(document.questionario["questao_"+Math.abs(qIndex)].value||0);
+
+      factor += value;
+    }
+
+    factor = comp_mask.correcao(factor);
+
+    for(var competencia in comp_mask.competencias){
+      comp_mask.competencias[competencia].value = 0;
+      for(var m in comp_mask.competencias[competencia].mask){
+        qIndex = comp_mask.competencias[competencia].mask[m];
+
+        value = Math.sign(qIndex)*(document.questionario["questao_"+Math.abs(qIndex)].value||0);
+
+        comp_mask.competencias[competencia].value += value;
       }
+
+      comp_mask.competencias[competencia].value += 6;
+      comp_mask.competencias[competencia].value -= factor;
+      comp_mask.competencias[competencia].value *= 100/25;
     }
 
-    if(blanks.length){
-      this.setState({msgError: blanks.join()});
-      this.refs.modalError.show();
-      return;
-    }
-  
-    let toDb = {
-      nome: this.state.nome,
-      key: this.state.key,
-      ans: ans 
-    }
-     
-    myFireBaseRef.push(toDb);
-    window.scrollTo(0, 0);
-    React.render(<Relatorio username={this.state.nome.toUpperCase()} ans={ans} competencias={comp_mask}/>, document.body);
+    React.render(<Relatorio competencias={comp_mask.competencias}/>, document.body);
 
   },
 
   render: function() {
-    console.log(this.state);
     return (
       <AppCanvas>
       <Card>
@@ -146,8 +118,8 @@ let PerfilEmpreendedor = React.createClass({
       <form name={"questionario"}>
       <List>
       {
-        this.props.questoes.map(function(questao, i) {
-          return ([<Pergunta questao={questao} checked={i!=0}/>,
+        this.props.questoes.map(function(questao) {
+          return ([<Pergunta questao={questao}/>,
           <ListDivider/>])
         })
       }
@@ -156,20 +128,7 @@ let PerfilEmpreendedor = React.createClass({
       </form>
       </Paper>
       </Card>
-      <Dialog 
-          ref="modalError"
-          title="Responda a(s) questão(ões) em branco:"
-          actions={[{text: 'Ok, entendi!', onClick: this.modalDismiss}]}
-          actionFocus="submit" modal={true}>
-          {this.state.msgError}
-      </Dialog>
-      <Dialog 
-          ref="modalName"
-          title="Qual o seu nome?"
-          actions={[{text: 'Confirmar', onClick: this.setName}]}
-          actionFocus="Submit" modal={true} openImmediately={!this.state.nome}>
-          <TextField ref="nameInput" hintText="Nome" />
-      </Dialog>
+
       </AppCanvas>
     )}
 });
@@ -193,7 +152,8 @@ let Pergunta = React.createClass({
         <p>{this.props.questao.pergunta}</p>
         <RadioButtonGroup name={"questao_"+this.props.questao.id}>
         {["Nunca", "Raramente", "Algumas vezes", "Geralmente", "Sempre"].map(function(label, index) {
-          return <RadioButton value={index + 1} label={label}/>
+          return <RadioButton value={index + 1}
+          label={label}/>
         })}
         </RadioButtonGroup>
         </ListItem>
@@ -211,17 +171,10 @@ let Relatorio = React.createClass({
     };
   },
 
-  getInitialState: function(){
-    return {
-      competencias: this.props.competencias
-    }  
-  },
-
   componentWillMount() {
     ThemeManager.setPalette({
       accent1Color: Colors.deepOrange500
     });
-   
   },
 
   subTotal1: 0,
@@ -238,44 +191,13 @@ let Relatorio = React.createClass({
 
   render: function() {
     let _this = this;
-    let qIndex;
-    let value = 0;
-    let factor = 0;
-    let competencias = this.state.competencias;
-    for(var m in competencias.fatMask){
-      qIndex = competencias.fatMask[m];
-                
-      value = Math.sign(qIndex)*(this.props.ans[Math.abs(qIndex)-1].value);
-                              
-      factor += value;
-    }
-      
-    factor = competencias.correcao(factor);
-                
-    for(var competencia in competencias.competencias){
-
-      competencias.competencias[competencia].value = 0;
-      
-      for(var m in competencias.competencias[competencia].mask){
-        qIndex = competencias.competencias[competencia].mask[m];
-                                               
-        value = Math.sign(qIndex)*(this.props.ans[Math.abs(qIndex)-1]);
-                                                                 
-        competencias.competencias[competencia].value += value;
-      }
-
-      competencias.competencias[competencia].value += 6;
-      competencias.competencias[competencia].value -= factor;
-      competencias.competencias[competencia].value *= 100/25;
-    }
-
     return (
         <AppCanvas>
           <Card>
             <Paper style={{margin: '5vw', padding: '5vw'}}>
               <h3>TESTE DO PERFIL EMPREENDEDOR DE {this.props.username||'NOME'}</h3>
               <hr />
-              <table style={{width:'50%', display:'inline-block'}}>
+              <table style={{width:600}}>
                 <thead>
                   <tr>
                     <th>Características empreendedoras pessoais</th>
@@ -288,7 +210,7 @@ let Relatorio = React.createClass({
                     <th>Realização</th>
                   </tr>
                   {
-                    competencias.competencias.slice(0,5).map(function(data){
+                    this.props.competencias.slice(0,5).map(function(data){
                       _this.subTotal1 += data.value;
                       _this.chartData1.labels.push(data.label);
                       _this.chartData1.datasets[0].data.push(data.value);
@@ -311,7 +233,7 @@ let Relatorio = React.createClass({
                     <th>Planejamento</th>
                   </tr>
                   {
-                    competencias.competencias.slice(5,8).map(function(data){
+                    this.props.competencias.slice(5,8).map(function(data){
                       _this.subTotal2 += data.value;
                       _this.chartData1.labels.push(data.label);
                       _this.chartData1.datasets[0].data.push(data.value);
@@ -334,10 +256,10 @@ let Relatorio = React.createClass({
                     <th>Poder</th>
                   </tr>
                   {
-                    competencias.competencias.slice(8,10).map(function(data){
+                    this.props.competencias.slice(8,10).map(function(data){
                       _this.subTotal3 += data.value;
                       _this.chartData1.labels.push(data.label);
-                      _this.chartData1.datasets[0].data.push(data.value);
+                      _this.chartData1.datasets[0].data.push(data.value+50);
                       return (
                         <tr>
                           <td>{data.label}</td>
@@ -356,80 +278,23 @@ let Relatorio = React.createClass({
                 </tbody>
 
               </table>
-              <table style={{width:'50%', float:'right', display:'inline-block'}}>
-                <thead>
-                  <tr>
-                    <th>CARACTERÍSTICAS</th>
-                    <th>OBTIDA</th>
-                    <th>MÁXIMA</th>
-                    <th>%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Realização</td>
-                    <td style={{'text-align':'center'}}>{this.subTotal1}</td>
-                    <td style={{'text-align':'center'}}>500</td>
-                    <td style={{'text-align':'center'}}>{Math.round(100*this.subTotal1/500)}</td>
-                  </tr>
-                  <tr>
-                    <td style={{'text-align':'left'}}>Planejamento</td>
-                    <td style={{'text-align':'center'}}>{this.subTotal2}</td>
-                    <td style={{'text-align':'center'}}>300</td>
-                    <td style={{'text-align':'center'}}>{Math.round(100*this.subTotal2/300)}</td>
-                  </tr>
-                  <tr>
-                    <td style={{'text-align':'left'}}>Poder</td>
-                    <td style={{'text-align':'center'}}>{this.subTotal3}</td>
-                    <td style={{'text-align':'center'}}>200</td>
-                    <td style={{'text-align':'center'}}>{Math.round(100*this.subTotal3/200)}</td>
-                  </tr>
-                  <tr>
-                    <th style={{'text-align':'left'}}>Total</th>
-                    <th style={{'text-align':'center'}}>{this.subTotal1+this.subTotal2+this.subTotal3}</th>
-                    <th style={{'text-align':'center'}}>1000</th>
-                    <th style={{'text-align':'center'}}>{Math.round(100*(this.subTotal1+this.subTotal2+this.subTotal3)/1000)}</th>
-                  </tr>
-                </tbody>
-              </table>
             </Paper>
             <Paper style={{margin: '5vw', padding: '5vw'}}>
               <h3>GRÁFICO - PONTUAÇÃO</h3>
               <hr />
               <BarChart 
               data={this.chartData1}
-              style={{width:'100%', height:600}}
+              style={{width:'50vw', height:600}}
               options={{
                 barValueSpacing : 50,
-              }} redraw/>
-            </Paper>
-            <Paper style={{margin: '5vw', padding: '5vw'}}>
-              <h3>GRÁFICO - CARACTERÍSTICAS</h3>
-              <hr />
-              <BarChart
-              style={{width:'100%', height:600}}
-              data={{                
-                  labels: ['Realização', 'Planejamento', 'Poder', 'Total'],
-                  datasets: [
-                    { 
-                      data:[
-                        this.subTotal1*100/500,
-
-                        this.subTotal2*100/300,
-
-                        this.subTotal3*100/200,
-
-                        (this.subTotal1+
-                        this.subTotal2+
-                        this.subTotal3)*100/1000
-                      ]
-                    }
-                  ]
-             }} />
+              }}/>
             </Paper>
           </Card>
         </AppCanvas>
     );
   }
 });
+
 React.render(<PerfilEmpreendedor questoes={questoes} />, document.body);
+React.render(<Relatorio competencias={comp_mask.competencias} />, document.body);
+

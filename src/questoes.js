@@ -100,6 +100,10 @@ module.exports = [
     "pergunta": "Faço o que estiver ao meu alcance para satisfazer a quem contratou o trabalho."
   },
   {
+    "id": 26,
+    "pergunta": "Capto oportunidades que passam despercebidas pelos outros e que atendem a alguma necessidade de negócio naquele momento."
+  },
+  {
     "id": 27,
     "pergunta": "Evito situações em que percebo que o resultado final fugiria ao meu controle."
   },

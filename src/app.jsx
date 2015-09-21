@@ -32,11 +32,8 @@ let DropDownMenu = mui.DropDownMenu;
 
 let Highcharts = require('react-highcharts/more');
 
-let ReactTabs = require('react-tabs');
 let Tab = mui.Tab;
 let Tabs = mui.Tabs;
-let TabList = ReactTabs.TabList;
-let TabPanel = ReactTabs.TabPanel;
 
 let BarChart = require("react-chartjs").Bar;
 
@@ -259,7 +256,7 @@ let Questionario = React.createClass({
       this.state.ans.push(ans.value);
       if(this.state.questao < this.props.questoes.length - 1) {
         this.setState({questao: ++this.state.questao}, function() {
-          //this.refs.current.refs.opt.clearValue();
+          this.refs.current.refs.opt.clearValue();
         });
       }
       else {

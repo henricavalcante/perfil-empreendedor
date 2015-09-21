@@ -18,10 +18,13 @@
   "dependencies": {
     "chart.js": "^1.0.2",
     "firebase": "^2.2.9",
-    "material-ui": "^0.10.4",
+    "material-ui": "^0.11.1",
+    "mdl-react": "0.0.24",
     "query-string": "^2.4.0",
     "react": "^0.13.3",
     "react-chartjs": "^0.6.0",
+    "react-highcharts": "^2.0.0",
+    "react-tabs": "^0.4.1",
     "react-tap-event-plugin": "^0.1.7",
     "uniqid": "^1.0.0"
   }

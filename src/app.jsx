@@ -30,6 +30,7 @@ let TextField = mui.TextField;
 let AppBar = mui.AppBar;
 let DropDownMenu = mui.DropDownMenu;
 
+let MDL = require('mdl-react');
 let Highcharts = require('react-highcharts/more');
 
 let Tab = mui.Tab;
@@ -126,7 +127,7 @@ let PerfilEmpreendedor = React.createClass({
         })()
       }
         <AppBar title={'Olá, '+this.state.nome}
-                iconElementLeft={<img src={"./src/img/wiSymbol.svg"} width={45} style={{margin: '0 20px'}} />}
+                iconElementLeft={<object data={"./src/img/wiSymbol.svg"} type="image/svg+xml" width="45" height="45" />}
                 iconElementRight={instru} 
                   style={{background: '#00313f'}}
                   className="menu"/>
@@ -256,7 +257,8 @@ let Questionario = React.createClass({
       this.state.ans.push(ans.value);
       if(this.state.questao < this.props.questoes.length - 1) {
         this.setState({questao: ++this.state.questao}, function() {
-          this.refs.current.refs.opt.clearValue();
+          React.findDOMNode(this.refs.current).reset();
+          React.findDOMNode(this.refs.current).querySelector(".is-checked").classList.remove("is-checked");
         });
       }
       else {
@@ -295,17 +297,17 @@ let Questionario = React.createClass({
               actionFocus='submit' modal={true}>
               Responda a questão para prosseguir
           </Dialog>
-          <form name={'questionario'}>
+          <form name={'questionario'} ref={'current'}>
             <Paper style={{background: '#ededed', margin: '2vw 7vw', padding: '5vw', boxShadow: 'none'}}>
               <List style={{background: '#ededed'}}>
-                  <Pergunta ref={'current'} questao={this.props.questoes[this.state.questao]} />
+                  <Pergunta questao={this.props.questoes[this.state.questao]} />
               </List>
             </Paper>
             <div style={{width:'100%', textAlign: 'right'}}>
               <FlatButton
                   hoverColor='rgba(0,49,63,0.2)'
                   rippleColor='rgba(0,49,63,0.4)'
-                  style={{color: '#00313f',marginRight: '7vw', right: 0}} label='Prosseguir' onClick={this.state.fim ? null :this.prosseguir} />
+                  style={{color: '#00313f', marginRight: '7vw', right: 0}} label='Prosseguir' onClick={this.state.fim ? null :this.prosseguir} />
             </div>
           </form>
         </section>
@@ -324,11 +326,10 @@ let Pergunta = React.createClass({
           <span><strong>Questão: </strong>{this.props.questao.id}</span>
         </h3>
           <p>{this.props.questao.pergunta}</p>
-          <RadioButtonGroup ref={"opt"} name={"questao_"+this.props.questao.id}>
           {["Nunca", "Raramente", "Algumas vezes", "Geralmente", "Sempre"].map(function(label, index) {
-            return <RadioButton ref={label} value={index + 1} label={label}/>
+            return <MDL.Toggle type="radio" ref={label} text={label} name="option" value={index + 1} />
           })}
-          </RadioButtonGroup>
+          
       </div>
     )
   }
@@ -382,7 +383,7 @@ let Relatorio = React.createClass({
     for(var m in competencias.fatMask){
       qIndex = competencias.fatMask[m];
                 
-      value = Math.sign(qIndex)*(this.props.ans[Math.abs(qIndex)-1].value);
+      value = (qIndex/Math.abs(qIndex))*(this.props.ans[Math.abs(qIndex)-1].value);
                               
       factor += value;
     }
@@ -396,7 +397,7 @@ let Relatorio = React.createClass({
       for(var m in competencias.competencias[competencia].mask){
         qIndex = competencias.competencias[competencia].mask[m];
                                                
-        value = Math.sign(qIndex)*(this.props.ans[Math.abs(qIndex)-1]);
+        value = (qIndex/Math.abs(qIndex))*(this.props.ans[Math.abs(qIndex)-1]);
                                                                  
         competencias.competencias[competencia].value += value;
       }

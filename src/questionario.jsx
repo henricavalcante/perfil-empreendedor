@@ -29,8 +29,8 @@ module.exports = React.createClass({
       this.state.ans.push(ans.value);
       if(this.state.questao < this.props.questoes.length - 1) {
         this.setState({questao: ++this.state.questao}, function() {
-          // React.findDOMNode(this.refs.current).reset();
-          // React.findDOMNode(this.refs.current).querySelector(".is-checked").classList.remove("is-checked");
+          React.findDOMNode(this.refs.current).reset();
+          React.findDOMNode(this.refs.current).querySelector(".is-checked").classList.remove("is-checked");
         });
       }
       else {

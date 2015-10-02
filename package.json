@@ -24,6 +24,7 @@
     "react": "^0.13.3",
     "react-chartjs": "^0.6.0",
     "react-highcharts": "^2.0.0",
+    "react-router": "^1.0.0-rc1",
     "react-tap-event-plugin": "^0.1.7",
     "uniqid": "^1.0.0"
   }

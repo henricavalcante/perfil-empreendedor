@@ -15,7 +15,7 @@ body, h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-body {
+/*body {
 	font-size: 15px;
 	line-height: 20px;
 	-webkit-touch-callout: none;
@@ -24,7 +24,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-}
+}*/
 
 .imagem {
 	background: "./src/img/logo.svg";

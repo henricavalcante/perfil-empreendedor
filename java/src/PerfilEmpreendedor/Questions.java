@@ -106,14 +106,17 @@ public class Questions extends javax.swing.JFrame {
         
         getQuestion((Question q) -> lblQuestion.setText(q.getQuestion()));
         
-        btnNext.setEnabled(false);
+        //btnNext.setEnabled(false);
         
     }
    
     public void getQuestion(Consumer<Question> r) {
         questions.forEach((Question q) -> {
+            
             if (q.getId() == this.currentQuestion) {
+                
                 r.accept(q);
+                
             }
         });
     }
@@ -129,6 +132,8 @@ public class Questions extends javax.swing.JFrame {
                 FillQuestion(this.currentQuestion + 1);
             }
         });
+        
+        setAnswer(3);
     }
     
     private void setAnswer(int answer) {
@@ -146,7 +151,7 @@ public class Questions extends javax.swing.JFrame {
     private void initComponents() {
 
         rbgQuestao = new javax.swing.ButtonGroup();
-        lblQuestion = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         jRadioButton1 = new javax.swing.JRadioButton();
         jRadioButton2 = new javax.swing.JRadioButton();
         jRadioButton3 = new javax.swing.JRadioButton();
@@ -154,12 +159,16 @@ public class Questions extends javax.swing.JFrame {
         jRadioButton5 = new javax.swing.JRadioButton();
         btnNext = new javax.swing.JButton();
         lblName = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        lblQuestion = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        lblQuestion.setText("...");
+        jPanel1.setBackground(new java.awt.Color(0, 49, 63));
 
         rbgQuestao.add(jRadioButton1);
+        jRadioButton1.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jRadioButton1.setForeground(new java.awt.Color(255, 255, 255));
         jRadioButton1.setText("Nunca");
         jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -168,6 +177,8 @@ public class Questions extends javax.swing.JFrame {
         });
 
         rbgQuestao.add(jRadioButton2);
+        jRadioButton2.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jRadioButton2.setForeground(new java.awt.Color(255, 255, 255));
         jRadioButton2.setText("Raramente");
         jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -176,6 +187,8 @@ public class Questions extends javax.swing.JFrame {
         });
 
         rbgQuestao.add(jRadioButton3);
+        jRadioButton3.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jRadioButton3.setForeground(new java.awt.Color(255, 255, 255));
         jRadioButton3.setText("Algumas vezes");
         jRadioButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -184,6 +197,8 @@ public class Questions extends javax.swing.JFrame {
         });
 
         rbgQuestao.add(jRadioButton4);
+        jRadioButton4.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jRadioButton4.setForeground(new java.awt.Color(255, 255, 255));
         jRadioButton4.setText("Geralmente");
         jRadioButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -192,6 +207,8 @@ public class Questions extends javax.swing.JFrame {
         });
 
         rbgQuestao.add(jRadioButton5);
+        jRadioButton5.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jRadioButton5.setForeground(new java.awt.Color(255, 255, 255));
         jRadioButton5.setText("Sempre");
         jRadioButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -199,40 +216,65 @@ public class Questions extends javax.swing.JFrame {
             }
         });
 
-        btnNext.setText("PROSSEGUIR");
+        btnNext.setBackground(new java.awt.Color(213, 182, 64));
+        btnNext.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        btnNext.setForeground(new java.awt.Color(0, 41, 53));
+        btnNext.setText("Prosseguir");
         btnNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNextActionPerformed(evt);
             }
         });
 
+        lblName.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        lblName.setForeground(new java.awt.Color(255, 255, 255));
         lblName.setText("...");
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(42, 42, 42)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnNext)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jRadioButton5)
-                        .addComponent(jRadioButton4)
-                        .addComponent(jRadioButton3)
-                        .addComponent(jRadioButton2)
-                        .addComponent(jRadioButton1)
-                        .addComponent(lblQuestion, javax.swing.GroupLayout.PREFERRED_SIZE, 615, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblName)))
-                .addContainerGap(41, Short.MAX_VALUE))
+        jScrollPane1.setBorder(null);
+
+        lblQuestion.setEditable(false);
+        lblQuestion.setBackground(new java.awt.Color(0, 49, 63));
+        lblQuestion.setColumns(20);
+        lblQuestion.setFont(new java.awt.Font("Courier New", 0, 18)); // NOI18N
+        lblQuestion.setForeground(new java.awt.Color(255, 255, 255));
+        lblQuestion.setLineWrap(true);
+        lblQuestion.setRows(5);
+        lblQuestion.setWrapStyleWord(true);
+        lblQuestion.setBorder(null);
+        lblQuestion.setFocusTraversalKeysEnabled(false);
+        lblQuestion.setFocusable(false);
+        jScrollPane1.setViewportView(lblQuestion);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(18, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnNext)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jRadioButton5)
+                            .addComponent(jRadioButton4)
+                            .addComponent(jRadioButton1)
+                            .addComponent(jRadioButton2)
+                            .addComponent(jRadioButton3)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 604, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18))))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addContainerGap(17, Short.MAX_VALUE)
+                    .addComponent(lblName, javax.swing.GroupLayout.PREFERRED_SIZE, 608, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(15, 15, 15)))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblName)
-                .addGap(53, 53, 53)
-                .addComponent(lblQuestion, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(57, 57, 57)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jRadioButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -243,9 +285,27 @@ public class Questions extends javax.swing.JFrame {
                 .addComponent(jRadioButton4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jRadioButton5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnNext)
-                .addGap(0, 18, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnNext, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(lblName, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(391, Short.MAX_VALUE)))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -278,13 +338,15 @@ public class Questions extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNext;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JRadioButton jRadioButton4;
     private javax.swing.JRadioButton jRadioButton5;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblName;
-    private javax.swing.JLabel lblQuestion;
+    private javax.swing.JTextArea lblQuestion;
     private javax.swing.ButtonGroup rbgQuestao;
     // End of variables declaration//GEN-END:variables
 }

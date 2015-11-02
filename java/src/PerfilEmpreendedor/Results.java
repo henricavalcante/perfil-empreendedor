@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import java.io.BufferedOutputStream;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.Fop;
-import org.apache.fop.apps.MimeConstants;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,8 +17,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
@@ -130,8 +134,63 @@ public class Results extends javax.swing.JFrame {
                 (Competence c) -> c.setScore(getPointsFromQuestions(c.getQuestions())+c.getFactor())
         );
         
+        String txtCompetences = competences
+                .stream()
+                .map(c ->formatResultLine(c.getDescription(), c.getScore()).concat("\n"))
+                .collect(StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append)
+                .toString();
+        
+        Iterator itGroups = competences
+                .stream()
+                .collect(
+                        Collectors.groupingBy(
+                                Competence::getGroup,
+                                Collectors.summingInt(Competence::getScore)
+                        )
+                ).entrySet().iterator();
+        
+        String txtGroups = "\n";
+        
+        while (itGroups.hasNext()) {
+            Map.Entry pair = (Map.Entry)itGroups.next();
+            txtGroups += formatResultLine(pair.getKey().toString(), (int)pair.getValue()).concat("\n");
+            itGroups.remove();
+        }
+        txtGroups += "\n";
+        
+        int totalScore = competences
+                .stream()
+                .mapToInt(Competence::getScore)
+                .sum();
+        
+        
+        txtResults.setText(
+                txtCompetences
+                        .concat(txtGroups)
+                        .concat(formatResultLine("TOTAL", totalScore))
+        );
+        
     }
     
+    public static String formatResultLine(final String competence, final int score) {
+        int size = 51;
+        if (competence == null) {
+            return null;
+        }
+        int pads = size - competence.length();
+        
+        if (score < 100) {
+            pads++;
+        }
+        
+        return competence
+                .concat(new String(new char[pads]).replace("\0", " "))
+                .concat(String.valueOf(score));
+    }
+     
+     
     private int getPointsFromQuestions(Integer[] numbers) {
         return questions
                 .stream()
@@ -149,11 +208,20 @@ public class Results extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtResults = new javax.swing.JTextArea();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        jPanel1.setBackground(new java.awt.Color(0, 49, 63));
+
+        jButton1.setBackground(new java.awt.Color(213, 182, 64));
+        jButton1.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(0, 41, 53));
         jButton1.setText("JSON");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -161,6 +229,9 @@ public class Results extends javax.swing.JFrame {
             }
         });
 
+        jButton2.setBackground(new java.awt.Color(213, 182, 64));
+        jButton2.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(0, 41, 53));
         jButton2.setText("PDF");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -168,25 +239,66 @@ public class Results extends javax.swing.JFrame {
             }
         });
 
+        jScrollPane1.setBorder(null);
+
+        txtResults.setEditable(false);
+        txtResults.setBackground(new java.awt.Color(0, 49, 63));
+        txtResults.setColumns(20);
+        txtResults.setFont(new java.awt.Font("Courier New", 0, 18)); // NOI18N
+        txtResults.setForeground(new java.awt.Color(255, 255, 255));
+        txtResults.setRows(5);
+        txtResults.setAutoscrolls(false);
+        txtResults.setBorder(null);
+        jScrollPane1.setViewportView(txtResults);
+
+        jButton3.setBackground(new java.awt.Color(213, 182, 64));
+        jButton3.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jButton3.setForeground(new java.awt.Color(0, 41, 53));
+        jButton3.setText("Sair");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(369, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton3)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addContainerGap(25, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 609, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap()))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(384, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(28, 28, 28)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(59, Short.MAX_VALUE)))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(468, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
-                .addGap(70, 70, 70))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(303, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
-                .addGap(21, 21, 21))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -263,5 +375,9 @@ public class Results extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea txtResults;
     // End of variables declaration//GEN-END:variables
 }

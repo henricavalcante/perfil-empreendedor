@@ -40,7 +40,7 @@ public class Competence {
     }
     
     public int getScore() {
-        return this.score;
+        return 100/35*this.score;
     }
     
     public void setScore(int score) {

@@ -6,6 +6,8 @@
 package PerfilEmpreendedor;
 
 import com.google.gson.Gson;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import java.io.BufferedOutputStream;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.Fop;
@@ -37,14 +39,17 @@ import org.xml.sax.SAXException;
 public class Results extends javax.swing.JFrame {
 
     private final ArrayList<Question> questions;
+    private final String name;
     private ArrayList<Competence> competences;
     
     /**
      * Creates new form Results
      * @param questions
      */
-    public Results(ArrayList<Question> questions) {
+    public Results(String name, ArrayList<Question> questions) {
         initComponents();
+        
+        this.name = name;
         this.questions = questions;
         
         int correctionFactor = questions
@@ -165,6 +170,9 @@ public class Results extends javax.swing.JFrame {
                 .mapToInt(Competence::getScore)
                 .sum();
         
+        Result r = new Result(this.name, this.competences);
+        //Save require mongo instance running.
+        //r.Save();
         
         txtResults.setText(
                 txtCompetences
@@ -214,6 +222,7 @@ public class Results extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         txtResults = new javax.swing.JTextArea();
         jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -233,6 +242,7 @@ public class Results extends javax.swing.JFrame {
         jButton2.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
         jButton2.setForeground(new java.awt.Color(0, 41, 53));
         jButton2.setText("PDF");
+        jButton2.setEnabled(false);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -255,13 +265,31 @@ public class Results extends javax.swing.JFrame {
         jButton3.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
         jButton3.setForeground(new java.awt.Color(0, 41, 53));
         jButton3.setText("Sair");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setBackground(new java.awt.Color(213, 182, 64));
+        jButton4.setFont(new java.awt.Font("Courier New", 1, 18)); // NOI18N
+        jButton4.setForeground(new java.awt.Color(0, 41, 53));
+        jButton4.setText("Salvar");
+        jButton4.setEnabled(false);
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(369, Short.MAX_VALUE)
+                .addContainerGap(253, Short.MAX_VALUE)
+                .addComponent(jButton4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
@@ -281,6 +309,7 @@ public class Results extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -324,58 +353,24 @@ public class Results extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         
-        
-        JFileChooser fileChooser = new JFileChooser();
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            
-            OutputStream out;
-
-            try {            
-                // Step 1: Construct a FopFactory
-                // (reuse if you plan to render multiple documents!)
-                FopFactory fopFactory = FopFactory.newInstance(file);
-
-                // Step 2: Set up output stream.
-                // Note: Using BufferedOutputStream for performance reasons (helpful with FileOutputStreams).
-                out = new BufferedOutputStream(new FileOutputStream(file));
-
-                // Step 3: Construct fop with desired output format
-                Fop fop = fopFactory.newFop("application/pdf", out);
-
-                // Step 4: Setup JAXP using identity transformer
-                TransformerFactory factory = TransformerFactory.newInstance();
-                Transformer transformer = factory.newTransformer(); // identity transformer
-
-                // Step 5: Setup input and output for XSLT transformation
-                // Setup input stream
-                Source src = new StreamSource(new File("C:/Temp/myfile.fo"));
-
-                // Resulting SAX events (the generated FO) must be piped through to FOP
-                Result res = new SAXResult(fop.getDefaultHandler());
-
-                // Step 6: Start XSLT transformation and FOP processing
-                transformer.transform(src, res);
-                
-                out.close();
-
-            } catch (SAXException | IOException ex) {
-                Logger.getLogger(Results.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerConfigurationException ex) {
-                Logger.getLogger(Results.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerException ex) {
-                Logger.getLogger(Results.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
+        //TODO - PDF export with fop
         
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea txtResults;

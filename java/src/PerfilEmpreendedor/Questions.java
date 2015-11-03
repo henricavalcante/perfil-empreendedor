@@ -12,13 +12,14 @@ import java.util.function.Consumer;
  *
  * @author henricavalcante
  */
-public class Questions extends javax.swing.JFrame {
+public final class Questions extends javax.swing.JFrame {
 
     /**
      *
      */
-    public ArrayList<Question> questions;
-    public int currentQuestion;
+    private ArrayList<Question> questions;
+    private String name;
+    private int currentQuestion;
     
     
     /**
@@ -31,7 +32,7 @@ public class Questions extends javax.swing.JFrame {
     public Questions(String name) {
         initComponents();
         
-        lblName.setText("Olá, " + name);
+        setUsername(name);
         
         questions = new ArrayList();
         questions.add(new Question(1, 1, "Em novas situações, quando comparadas as anteriores, procuro atingir resultados melhores do que os obtidos naquelas."));
@@ -93,6 +94,11 @@ public class Questions extends javax.swing.JFrame {
         FillQuestion();
         
     }
+    
+    public void setUsername(String name) {
+        this.name = name;
+        lblName.setText("Olá, " + name);
+    }
 
     private void FillQuestion() {
         
@@ -106,7 +112,7 @@ public class Questions extends javax.swing.JFrame {
         
         getQuestion((Question q) -> lblQuestion.setText(q.getQuestion()));
         
-        //btnNext.setEnabled(false);
+        btnNext.setEnabled(false);
         
     }
    
@@ -123,7 +129,7 @@ public class Questions extends javax.swing.JFrame {
     
     private void nextQuestion() {
         if (this.currentQuestion == questions.size()) {
-            new Results(questions).setVisible(true);
+            new Results(this.name, this.questions).setVisible(true);
             this.setVisible(false);
         }
         getQuestion((Question q) -> {
@@ -133,7 +139,8 @@ public class Questions extends javax.swing.JFrame {
             }
         });
         
-        setAnswer(3);
+        //Uncomment this line to easy test.
+        //setAnswer(3);
     }
     
     private void setAnswer(int answer) {

@@ -5,6 +5,12 @@
  */
 package PerfilEmpreendedor;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.client.MongoDatabase;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 /**
@@ -13,11 +19,13 @@ import javax.swing.JFrame;
  */
 public class Splash extends javax.swing.JFrame {
 
+    
+    
     /**
      * Creates new form Splash
      */
     public Splash() {
-        initComponents();
+        initComponents();        
     }
 
     /**

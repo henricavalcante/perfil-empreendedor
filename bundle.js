@@ -54,12 +54,14 @@
 
 	var PerfilEmpreendedor = __webpack_require__(199);
 	var Relatorio = __webpack_require__(405);
+	var Resumo = __webpack_require__(364);
 
 	React.render(React.createElement(
 	  Router,
 	  null,
 	  React.createElement(Route, { path: '/', component: PerfilEmpreendedor }),
-	  React.createElement(Route, { path: '/relatorio', component: Relatorio })
+	  React.createElement(Route, { path: '/relatorio', component: Relatorio }),
+	  React.createElement(Route, { path: '/view', component: Resumo })
 	), document.body);
 
 /***/ },
@@ -24276,7 +24278,7 @@
 	var questoes = __webpack_require__(361);
 	var comp_mask = __webpack_require__(362);
 	var FireBase = __webpack_require__(363);
-	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 	var FlatButton = mui.FlatButton;
 	var Colors = mui.Styles.Colors;
@@ -24335,7 +24337,7 @@
 	      ans: this.refs.questionario.state.ans
 	    };
 
-	    myFireBaseRef.push(toDb);
+	    myFireBaseRef.child(toDb['key']).set(toDb);
 
 	    this.setState({ display: "relatorio", ans: this.refs.questionario.state.ans }, function () {
 	      window.scrollTo(0, 0);
@@ -45859,6 +45861,10 @@
 	var mui = __webpack_require__(200);
 	var injectTapEventPlugin = __webpack_require__(354)();
 	var Highcharts = __webpack_require__(365);
+	var comp_mask = __webpack_require__(362);
+	var FireBase = __webpack_require__(363);
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
+	var queryString = __webpack_require__(358);
 
 	var ThemeManager = new mui.Styles.ThemeManager();
 	var Tab = mui.Tab;
@@ -45866,6 +45872,10 @@
 	var Colors = mui.Styles.Colors;
 	var AppCanvas = mui.AppCanvas;
 	var Paper = mui.Paper;
+	var Dialog = mui.Dialog;
+	var AppBar = mui.AppBar;
+
+	var urlData = queryString.parse(location.search);
 
 	module.exports = React.createClass({
 	  displayName: 'exports',
@@ -45880,14 +45890,20 @@
 	    };
 	  },
 
-	  getInitialState: function getInitialState() {
-	    return {
-	      competencias: this.props.competencias,
-	      tabsValue: 'a'
-	    };
-	  },
-
 	  componentWillMount: function componentWillMount() {
+	    var that = this;
+	    if (!this.props.ans.length) {
+	      myFireBaseRef.authWithCustomToken(urlData.auth || "", function (error, result) {
+	        if (!error) {
+	          myFireBaseRef.child(urlData.user).on("value", function (data) {
+	            var data = data.exportVal();
+	            if (data) that.setState({ ans: data.ans, nome: data.nome });else that.setState({ dialog: 'Não há registro para esse usuário.' });
+	          });
+	        } else {
+	          that.setState({ dialog: 'Você não está autozidado' });
+	        }
+	      });
+	    }
 	    ThemeManager.setPalette({
 	      accent1Color: Colors.deepOrange500
 	    });
@@ -45907,16 +45923,48 @@
 	    data: []
 	  },
 
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      ans: []
+	    };
+	  },
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      competencias: this.props.competencias,
+	      tabsValue: 'a',
+	      ans: this.props.ans,
+	      dialog: 'Aguarde ...'
+	    };
+	  },
+
 	  render: function render() {
 	    var _this = this;
 	    var qIndex = undefined;
 	    var value = 0;
 	    var factor = 0;
-	    var competencias = this.state.competencias;
+	    var competencias = comp_mask;
+
+	    var ans = this.state.ans;
+	    console.log(ans);
+
+	    if (!Object.keys(this.state.ans).length) {
+	      return React.createElement(
+	        Dialog,
+	        {
+	          title: 'Perfil Empreendedor',
+	          actions: this.standardActions,
+	          actionFocus: 'submit',
+	          openImmediately: true,
+	          modal: this.state.modal },
+	        this.state.dialog
+	      );
+	    }
+
 	    for (var m in competencias.fatMask) {
 	      qIndex = competencias.fatMask[m];
 
-	      value = qIndex / Math.abs(qIndex) * this.props.ans[Math.abs(qIndex) - 1].value;
+	      value = qIndex / Math.abs(qIndex) * ans[Math.abs(qIndex) - 1].value;
 
 	      factor += value;
 	    }
@@ -45930,7 +45978,7 @@
 	      for (var m in competencias.competencias[competencia].mask) {
 	        qIndex = competencias.competencias[competencia].mask[m];
 
-	        value = qIndex / Math.abs(qIndex) * this.props.ans[Math.abs(qIndex) - 1];
+	        value = qIndex / Math.abs(qIndex) * ans[Math.abs(qIndex) - 1];
 
 	        competencias.competencias[competencia].value += value;
 	      }
@@ -85314,7 +85362,7 @@
 	var queryString = __webpack_require__(358);
 
 	var FireBase = __webpack_require__(363);
-	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 	var comp_mask = __webpack_require__(362);
 

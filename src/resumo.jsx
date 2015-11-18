@@ -2,6 +2,10 @@ let React = require('react');
 let mui = require('material-ui');
 let injectTapEventPlugin = require("react-tap-event-plugin")();
 let Highcharts = require('react-highcharts/more');
+let comp_mask = require('./competencias_mask');
+let FireBase = require('firebase');
+let myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
+let queryString = require('query-string');
 
 let ThemeManager = new mui.Styles.ThemeManager();
 let Tab = mui.Tab;
@@ -9,6 +13,10 @@ let Tabs = mui.Tabs;
 let Colors = mui.Styles.Colors;
 let AppCanvas = mui.AppCanvas;
 let Paper = mui.Paper;
+let Dialog = mui.Dialog;
+let AppBar = mui.AppBar;
+
+let urlData = queryString.parse(location.search);
 
 module.exports = React.createClass({
   childContextTypes: {
@@ -21,14 +29,26 @@ module.exports = React.createClass({
     };
   },
 
-  getInitialState: function(){
-    return {
-      competencias: this.props.competencias,
-      tabsValue: 'a'
-    }  
-  },
-
   componentWillMount() {
+    var that = this;
+    if(!this.props.ans.length) {
+      myFireBaseRef.authWithCustomToken(urlData.auth||"", function(error, result){
+        if(!error) {
+          myFireBaseRef.child(urlData.user).on("value", function(data) {
+            var data = data.exportVal();
+            if(data)
+              that.setState({ans: data.ans, nome: data.nome});
+            else
+              that.setState({dialog: 'Não há registro para esse usuário.'});
+          });
+        }
+        else {
+          that.setState({dialog: 'Você não está autozidado'});
+        }
+
+      });
+      
+    }
     ThemeManager.setPalette({
       accent1Color: Colors.deepOrange500
     });
@@ -49,16 +69,46 @@ module.exports = React.createClass({
     data: []
   },
 
+  getDefaultProps: function() {
+    return {
+      ans: []
+    };
+  },
+
+  getInitialState: function(){
+    return {
+      competencias: this.props.competencias,
+      tabsValue: 'a',
+      ans: this.props.ans,
+      dialog: 'Aguarde ...'
+    }  
+  },
+
   render: function() {
     let _this = this;
     let qIndex;
     let value = 0;
     let factor = 0;
-    let competencias = this.state.competencias;
+    let competencias = comp_mask;
+
+    let ans = this.state.ans;
+    console.log(ans);
+
+    if(!Object.keys(this.state.ans).length) {
+      return <Dialog
+                  title="Perfil Empreendedor"
+                  actions={this.standardActions}
+                  actionFocus="submit"
+                  openImmediately={true}
+                  modal={this.state.modal}>
+                  {this.state.dialog}
+                </Dialog>
+    }
+
     for(var m in competencias.fatMask){
       qIndex = competencias.fatMask[m];
                 
-      value = (qIndex/Math.abs(qIndex))*(this.props.ans[Math.abs(qIndex)-1].value);
+      value = (qIndex/Math.abs(qIndex))*(ans[Math.abs(qIndex)-1].value);
                               
       factor += value;
     }
@@ -72,7 +122,7 @@ module.exports = React.createClass({
       for(var m in competencias.competencias[competencia].mask){
         qIndex = competencias.competencias[competencia].mask[m];
                                                
-        value = (qIndex/Math.abs(qIndex))*(this.props.ans[Math.abs(qIndex)-1]);
+        value = (qIndex/Math.abs(qIndex))*(ans[Math.abs(qIndex)-1]);
                                                                  
         competencias.competencias[competencia].value += value;
       }
@@ -84,7 +134,6 @@ module.exports = React.createClass({
 
     return (
         <AppCanvas>
-
             <Tabs onChange={ this.handleTabsChange }>
               <Tab label="Características" value="a">
                 <Paper style={{margin: '5vw', padding: '5vw', overflow:'auto'}}>

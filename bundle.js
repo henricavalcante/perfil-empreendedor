@@ -54,12 +54,14 @@
 
 	var PerfilEmpreendedor = __webpack_require__(199);
 	var Relatorio = __webpack_require__(405);
+	var Resumo = __webpack_require__(364);
 
 	React.render(React.createElement(
 	  Router,
 	  null,
 	  React.createElement(Route, { path: '/', component: PerfilEmpreendedor }),
-	  React.createElement(Route, { path: '/relatorio', component: Relatorio })
+	  React.createElement(Route, { path: '/relatorio', component: Relatorio }),
+	  React.createElement(Route, { path: '/view', component: Resumo })
 	), document.body);
 
 /***/ },
@@ -24276,7 +24278,7 @@
 	var questoes = __webpack_require__(361);
 	var comp_mask = __webpack_require__(362);
 	var FireBase = __webpack_require__(363);
-	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 	var FlatButton = mui.FlatButton;
 	var Colors = mui.Styles.Colors;
@@ -24335,7 +24337,7 @@
 	      ans: this.refs.questionario.state.ans
 	    };
 
-	    myFireBaseRef.push(toDb);
+	    myFireBaseRef.child(toDb['key']).set(toDb);
 
 	    this.setState({ display: "relatorio", ans: this.refs.questionario.state.ans }, function () {
 	      window.scrollTo(0, 0);
@@ -45859,6 +45861,10 @@
 	var mui = __webpack_require__(200);
 	var injectTapEventPlugin = __webpack_require__(354)();
 	var Highcharts = __webpack_require__(365);
+	var comp_mask = __webpack_require__(362);
+	var FireBase = __webpack_require__(363);
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
+	var queryString = __webpack_require__(358);
 
 	var ThemeManager = new mui.Styles.ThemeManager();
 	var Tab = mui.Tab;
@@ -45866,6 +45872,10 @@
 	var Colors = mui.Styles.Colors;
 	var AppCanvas = mui.AppCanvas;
 	var Paper = mui.Paper;
+	var Dialog = mui.Dialog;
+	var AppBar = mui.AppBar;
+
+	var urlData = queryString.parse(location.search);
 
 	module.exports = React.createClass({
 	  displayName: 'exports',
@@ -45880,14 +45890,20 @@
 	    };
 	  },
 
-	  getInitialState: function getInitialState() {
-	    return {
-	      competencias: this.props.competencias,
-	      tabsValue: 'a'
-	    };
-	  },
-
 	  componentWillMount: function componentWillMount() {
+	    var that = this;
+	    if (!this.props.ans.length) {
+	      myFireBaseRef.authWithCustomToken(urlData.auth || "", function (error, result) {
+	        if (!error) {
+	          myFireBaseRef.child(urlData.user).on("value", function (data) {
+	            var data = data.exportVal();
+	            if (data) that.setState({ ans: data.ans, nome: data.nome });else that.setState({ dialog: 'Não há registro para esse usuário.' });
+	          });
+	        } else {
+	          that.setState({ dialog: 'Você não está autozidado' });
+	        }
+	      });
+	    }
 	    ThemeManager.setPalette({
 	      accent1Color: Colors.deepOrange500
 	    });
@@ -45907,16 +45923,50 @@
 	    data: []
 	  },
 
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      ans: []
+	    };
+	  },
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      competencias: this.props.competencias,
+	      tabsValue: 'a',
+	      ans: this.props.ans,
+	      dialog: 'Aguarde ...'
+	    };
+	  },
+
 	  render: function render() {
+	    var _this2 = this;
+
 	    var _this = this;
 	    var qIndex = undefined;
 	    var value = 0;
 	    var factor = 0;
-	    var competencias = this.state.competencias;
+	    var competencias = comp_mask;
+
+	    var ans = this.state.ans;
+	    console.log(ans);
+
+	    if (!Object.keys(this.state.ans).length) {
+	      return React.createElement(
+	        Dialog,
+	        {
+	          title: 'Perfil Empreendedor',
+	          actions: this.standardActions,
+	          actionFocus: 'submit',
+	          openImmediately: true,
+	          modal: this.state.modal },
+	        this.state.dialog
+	      );
+	    }
+
 	    for (var m in competencias.fatMask) {
 	      qIndex = competencias.fatMask[m];
 
-	      value = qIndex / Math.abs(qIndex) * this.props.ans[Math.abs(qIndex) - 1].value;
+	      value = qIndex / Math.abs(qIndex) * ans[Math.abs(qIndex) - 1].value;
 
 	      factor += value;
 	    }
@@ -45930,7 +45980,7 @@
 	      for (var m in competencias.competencias[competencia].mask) {
 	        qIndex = competencias.competencias[competencia].mask[m];
 
-	        value = qIndex / Math.abs(qIndex) * this.props.ans[Math.abs(qIndex) - 1];
+	        value = qIndex / Math.abs(qIndex) * ans[Math.abs(qIndex) - 1];
 
 	        competencias.competencias[competencia].value += value;
 	      }
@@ -45944,455 +45994,467 @@
 	      AppCanvas,
 	      null,
 	      React.createElement(
-	        Tabs,
-	        { onChange: this.handleTabsChange },
+	        'section',
+	        null,
+	        (function () {
+	          if (!_this2.props.ans.length) {
+	            return React.createElement(AppBar, { title: 'Olá, ' + _this2.state.nome,
+	              iconElementLeft: React.createElement('object', { data: "./src/img/wiSymbol.svg", type: 'image/svg+xml', width: '45', height: '45' }),
+	              style: { background: '#00313f' },
+	              className: 'menu' });
+	          }
+	        })(),
 	        React.createElement(
-	          Tab,
-	          { label: 'Características', value: 'a' },
+	          Tabs,
+	          { onChange: this.handleTabsChange },
 	          React.createElement(
-	            Paper,
-	            { style: { margin: '5vw', padding: '5vw', overflow: 'auto' } },
-	            React.createElement('hr', null),
+	            Tab,
+	            { label: 'Características', value: 'a' },
 	            React.createElement(
-	              'div',
-	              { className: 'caracteristicas-table' },
+	              Paper,
+	              { style: { margin: '5vw', padding: '5vw', overflow: 'auto' } },
+	              React.createElement('hr', null),
 	              React.createElement(
-	                'table',
-	                { style: { width: '100%' } },
+	                'div',
+	                { className: 'caracteristicas-table' },
 	                React.createElement(
-	                  'thead',
-	                  null,
+	                  'table',
+	                  { style: { width: '100%' } },
 	                  React.createElement(
-	                    'tr',
+	                    'thead',
 	                    null,
 	                    React.createElement(
-	                      'th',
-	                      { style: { width: '80%' } },
-	                      'Características empreendedoras pessoais'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { width: '10%' } },
-	                      'OBITIDA'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { width: '10%' } },
-	                      'MÁXIMA'
-	                    )
-	                  )
-	                ),
-	                React.createElement(
-	                  'tbody',
-	                  null,
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      null,
-	                      'Realização'
-	                    )
-	                  ),
-	                  competencias.competencias.slice(0, 5).map(function (data) {
-	                    _this.subTotal1 += data.value;
-	                    _this.caracteristicasData.data.push({ y: data.value, name: data.label });
-	                    _this.informacoesData.data.push({ y: data.value, name: data.label });
-	                    return React.createElement(
 	                      'tr',
 	                      null,
 	                      React.createElement(
-	                        'td',
-	                        null,
-	                        data.label
+	                        'th',
+	                        { style: { width: '80%' } },
+	                        'Características empreendedoras pessoais'
 	                      ),
 	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        data.value
+	                        'th',
+	                        { style: { width: '10%' } },
+	                        'OBITIDA'
 	                      ),
 	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        '100'
+	                        'th',
+	                        { style: { width: '10%' } },
+	                        'MÁXIMA'
 	                      )
-	                    );
-	                  }),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'left' } },
-	                      'Sub Total I'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      null,
-	                      this.subTotal1
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      null,
-	                      '500'
 	                    )
 	                  ),
-	                  React.createElement('tr', null),
 	                  React.createElement(
-	                    'tr',
+	                    'tbody',
 	                    null,
 	                    React.createElement(
-	                      'th',
-	                      null,
-	                      'Planejamento'
-	                    )
-	                  ),
-	                  competencias.competencias.slice(5, 8).map(function (data) {
-	                    _this.subTotal2 += data.value;
-	                    _this.caracteristicasData.data.push({ y: data.value, name: data.label });
-	                    _this.informacoesData.data.push({ y: data.value, name: data.label });
-	                    return React.createElement(
 	                      'tr',
 	                      null,
 	                      React.createElement(
-	                        'td',
+	                        'th',
 	                        null,
-	                        data.label
-	                      ),
-	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        data.value
-	                      ),
-	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        '100'
+	                        'Realização'
 	                      )
-	                    );
-	                  }),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'left' } },
-	                      'Sub Total II'
 	                    ),
+	                    competencias.competencias.slice(0, 5).map(function (data) {
+	                      _this.subTotal1 += data.value;
+	                      _this.caracteristicasData.data.push({ y: data.value, name: data.label });
+	                      _this.informacoesData.data.push({ y: data.value, name: data.label });
+	                      return React.createElement(
+	                        'tr',
+	                        null,
+	                        React.createElement(
+	                          'td',
+	                          null,
+	                          data.label
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          data.value
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          '100'
+	                        )
+	                      );
+	                    }),
 	                    React.createElement(
-	                      'th',
-	                      null,
-	                      this.subTotal2
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      null,
-	                      '300'
-	                    )
-	                  ),
-	                  React.createElement('tr', null),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      null,
-	                      'Poder'
-	                    )
-	                  ),
-	                  competencias.competencias.slice(8, 10).map(function (data) {
-	                    _this.subTotal3 += data.value;
-	                    _this.caracteristicasData.data.push({ y: data.value, name: data.label });
-	                    _this.informacoesData.data.push({ y: data.value, name: data.label });
-	                    return React.createElement(
 	                      'tr',
 	                      null,
 	                      React.createElement(
-	                        'td',
+	                        'th',
+	                        { style: { 'text-align': 'left' } },
+	                        'Sub Total I'
+	                      ),
+	                      React.createElement(
+	                        'th',
 	                        null,
-	                        data.label
+	                        this.subTotal1
 	                      ),
 	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        data.value
-	                      ),
-	                      React.createElement(
-	                        'td',
-	                        { style: { 'text-align': 'center' } },
-	                        '100'
+	                        'th',
+	                        null,
+	                        '500'
 	                      )
-	                    );
-	                  }),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'left' } },
-	                      'Sub Total III'
 	                    ),
+	                    React.createElement('tr', null),
 	                    React.createElement(
-	                      'th',
+	                      'tr',
 	                      null,
-	                      this.subTotal3
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        'Planejamento'
+	                      )
 	                    ),
+	                    competencias.competencias.slice(5, 8).map(function (data) {
+	                      _this.subTotal2 += data.value;
+	                      _this.caracteristicasData.data.push({ y: data.value, name: data.label });
+	                      _this.informacoesData.data.push({ y: data.value, name: data.label });
+	                      return React.createElement(
+	                        'tr',
+	                        null,
+	                        React.createElement(
+	                          'td',
+	                          null,
+	                          data.label
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          data.value
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          '100'
+	                        )
+	                      );
+	                    }),
 	                    React.createElement(
-	                      'th',
+	                      'tr',
 	                      null,
-	                      '200'
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'left' } },
+	                        'Sub Total II'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        this.subTotal2
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        '300'
+	                      )
+	                    ),
+	                    React.createElement('tr', null),
+	                    React.createElement(
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        'Poder'
+	                      )
+	                    ),
+	                    competencias.competencias.slice(8, 10).map(function (data) {
+	                      _this.subTotal3 += data.value;
+	                      _this.caracteristicasData.data.push({ y: data.value, name: data.label });
+	                      _this.informacoesData.data.push({ y: data.value, name: data.label });
+	                      return React.createElement(
+	                        'tr',
+	                        null,
+	                        React.createElement(
+	                          'td',
+	                          null,
+	                          data.label
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          data.value
+	                        ),
+	                        React.createElement(
+	                          'td',
+	                          { style: { 'text-align': 'center' } },
+	                          '100'
+	                        )
+	                      );
+	                    }),
+	                    React.createElement(
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'left' } },
+	                        'Sub Total III'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        this.subTotal3
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        null,
+	                        '200'
+	                      )
 	                    )
 	                  )
 	                )
-	              )
-	            ),
-	            React.createElement(
-	              'div',
-	              { className: 'caracteristicas-totais-table' },
+	              ),
 	              React.createElement(
-	                'table',
-	                { style: { width: '100%' } },
+	                'div',
+	                { className: 'caracteristicas-totais-table' },
 	                React.createElement(
-	                  'thead',
-	                  null,
+	                  'table',
+	                  { style: { width: '100%' } },
 	                  React.createElement(
-	                    'tr',
+	                    'thead',
 	                    null,
 	                    React.createElement(
-	                      'th',
-	                      { style: { width: '70%' } },
-	                      'CARACTERÍSTICAS'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { width: '10%' } },
-	                      'OBTIDA'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { width: '10%' } },
-	                      'MÁXIMA'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { width: '10%' } },
-	                      '%'
-	                    )
-	                  )
-	                ),
-	                React.createElement(
-	                  'tbody',
-	                  null,
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'td',
+	                      'tr',
 	                      null,
-	                      'Realização'
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      this.subTotal1
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      '500'
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      Math.round(100 * this.subTotal1 / 500)
+	                      React.createElement(
+	                        'th',
+	                        { style: { width: '70%' } },
+	                        'CARACTERÍSTICAS'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { width: '10%' } },
+	                        'OBTIDA'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { width: '10%' } },
+	                        'MÁXIMA'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { width: '10%' } },
+	                        '%'
+	                      )
 	                    )
 	                  ),
 	                  React.createElement(
-	                    'tr',
+	                    'tbody',
 	                    null,
 	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'left' } },
-	                      'Planejamento'
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'td',
+	                        null,
+	                        'Realização'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        this.subTotal1
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        '500'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        Math.round(100 * this.subTotal1 / 500)
+	                      )
 	                    ),
 	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      this.subTotal2
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'left' } },
+	                        'Planejamento'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        this.subTotal2
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        '300'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        Math.round(100 * this.subTotal2 / 300)
+	                      )
 	                    ),
 	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      '300'
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'left' } },
+	                        'Poder'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        this.subTotal3
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        '200'
+	                      ),
+	                      React.createElement(
+	                        'td',
+	                        { style: { 'text-align': 'center' } },
+	                        Math.round(100 * this.subTotal3 / 200)
+	                      )
 	                    ),
 	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      Math.round(100 * this.subTotal2 / 300)
-	                    )
-	                  ),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'left' } },
-	                      'Poder'
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      this.subTotal3
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      '200'
-	                    ),
-	                    React.createElement(
-	                      'td',
-	                      { style: { 'text-align': 'center' } },
-	                      Math.round(100 * this.subTotal3 / 200)
-	                    )
-	                  ),
-	                  React.createElement(
-	                    'tr',
-	                    null,
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'left' } },
-	                      'Total'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'center' } },
-	                      this.subTotal1 + this.subTotal2 + this.subTotal3
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'center' } },
-	                      '1000'
-	                    ),
-	                    React.createElement(
-	                      'th',
-	                      { style: { 'text-align': 'center' } },
-	                      Math.round(100 * (this.subTotal1 + this.subTotal2 + this.subTotal3) / 1000)
+	                      'tr',
+	                      null,
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'left' } },
+	                        'Total'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'center' } },
+	                        this.subTotal1 + this.subTotal2 + this.subTotal3
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'center' } },
+	                        '1000'
+	                      ),
+	                      React.createElement(
+	                        'th',
+	                        { style: { 'text-align': 'center' } },
+	                        Math.round(100 * (this.subTotal1 + this.subTotal2 + this.subTotal3) / 1000)
+	                      )
 	                    )
 	                  )
 	                )
 	              )
 	            )
-	          )
-	        ),
-	        React.createElement(
-	          Tab,
-	          { label: 'Gráfico Detalhado', value: 'b' },
+	          ),
 	          React.createElement(
-	            Paper,
-	            { style: { margin: '5vw', padding: '5vw' } },
-	            React.createElement(Highcharts, { config: {
-	                chart: {
-	                  type: 'column'
-	                },
-	                title: {
-	                  text: 'GRÁFICO CARACTERÍSTICA REALIZAÇÃO'
-	                },
-	                xAxis: {
-	                  type: 'category',
-	                  labels: {
-	                    autoRotation: [-90]
-	                  }
-	                },
-	                yAxis: {
-	                  labels: {
-	                    enabled: false
+	            Tab,
+	            { label: 'Gráfico Detalhado', value: 'b' },
+	            React.createElement(
+	              Paper,
+	              { style: { margin: '5vw', padding: '5vw' } },
+	              React.createElement(Highcharts, { config: {
+	                  chart: {
+	                    type: 'column'
 	                  },
 	                  title: {
-	                    text: false
-	                  }
+	                    text: 'GRÁFICO CARACTERÍSTICA REALIZAÇÃO'
+	                  },
+	                  xAxis: {
+	                    type: 'category',
+	                    labels: {
+	                      autoRotation: [-90]
+	                    }
+	                  },
+	                  yAxis: {
+	                    labels: {
+	                      enabled: false
+	                    },
+	                    title: {
+	                      text: false
+	                    }
 
-	                },
-	                legend: {
-	                  enabled: false
-	                },
-	                plotOptions: {
-	                  series: {
-	                    borderWidth: 0,
-	                    dataLabels: {
-	                      enabled: true,
-	                      format: '{point.y:.1f}%'
-	                    }
-	                  }
-	                },
-	                tooltip: {
-	                  headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-	                  pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.0f}%</b> of total<br/>'
-	                },
-	                series: [this.informacoesData]
-	              } })
-	          )
-	        ),
-	        React.createElement(
-	          Tab,
-	          { label: 'Gráfico Total', value: 'c' },
-	          React.createElement(
-	            Paper,
-	            { style: { margin: '5vw', padding: '5vw' } },
-	            React.createElement(Highcharts, { config: {
-	                chart: {
-	                  type: 'column'
-	                },
-	                title: {
-	                  text: 'GRÁFICO CARACTERÍSTICA TOTAL'
-	                },
-	                xAxis: {
-	                  type: 'category',
-	                  labels: {
-	                    autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
-	                  }
-	                },
-	                yAxis: {
-	                  labels: {
+	                  },
+	                  legend: {
 	                    enabled: false
 	                  },
-	                  title: {
-	                    text: false
-	                  }
-	                },
-	                legend: {
-	                  enabled: false
-	                },
-	                plotOptions: {
-	                  series: {
-	                    borderWidth: 0,
-	                    dataLabels: {
-	                      enabled: true,
-	                      format: '{point.y:.1f}%'
+	                  plotOptions: {
+	                    series: {
+	                      borderWidth: 0,
+	                      dataLabels: {
+	                        enabled: true,
+	                        format: '{point.y:.1f}%'
+	                      }
 	                    }
-	                  }
-	                },
-	                tooltip: {
-	                  headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-	                  pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>'
-	                },
-	                series: [{
-	                  name: "Característica",
-	                  colorByPoint: true,
-	                  data: [{
-	                    name: "Realização",
-	                    y: this.subTotal1
-	                  }, {
-	                    name: "Planejamento",
-	                    y: this.subTotal2
-	                  }, {
-	                    name: "Poder",
-	                    y: this.subTotal3
-	                  }, {
-	                    name: "Total",
-	                    y: this.subTotal1 + this.subTotal2 + this.subTotal3
+	                  },
+	                  tooltip: {
+	                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+	                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.0f}%</b> of total<br/>'
+	                  },
+	                  series: [this.informacoesData]
+	                } })
+	            )
+	          ),
+	          React.createElement(
+	            Tab,
+	            { label: 'Gráfico Total', value: 'c' },
+	            React.createElement(
+	              Paper,
+	              { style: { margin: '5vw', padding: '5vw' } },
+	              React.createElement(Highcharts, { config: {
+	                  chart: {
+	                    type: 'column'
+	                  },
+	                  title: {
+	                    text: 'GRÁFICO CARACTERÍSTICA TOTAL'
+	                  },
+	                  xAxis: {
+	                    type: 'category',
+	                    labels: {
+	                      autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
+	                    }
+	                  },
+	                  yAxis: {
+	                    labels: {
+	                      enabled: false
+	                    },
+	                    title: {
+	                      text: false
+	                    }
+	                  },
+	                  legend: {
+	                    enabled: false
+	                  },
+	                  plotOptions: {
+	                    series: {
+	                      borderWidth: 0,
+	                      dataLabels: {
+	                        enabled: true,
+	                        format: '{point.y:.1f}%'
+	                      }
+	                    }
+	                  },
+	                  tooltip: {
+	                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+	                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>'
+	                  },
+	                  series: [{
+	                    name: "Característica",
+	                    colorByPoint: true,
+	                    data: [{
+	                      name: "Realização",
+	                      y: this.subTotal1
+	                    }, {
+	                      name: "Planejamento",
+	                      y: this.subTotal2
+	                    }, {
+	                      name: "Poder",
+	                      y: this.subTotal3
+	                    }, {
+	                      name: "Total",
+	                      y: this.subTotal1 + this.subTotal2 + this.subTotal3
+	                    }]
 	                  }]
-	                }]
-	              } })
+	                } })
+	            )
 	          )
 	        )
 	      )
@@ -85314,7 +85376,7 @@
 	var queryString = __webpack_require__(358);
 
 	var FireBase = __webpack_require__(363);
-	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+	var myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 	var comp_mask = __webpack_require__(362);
 

@@ -8,7 +8,7 @@ let uniqid = require('uniqid');
 let questoes = require('./questoes');
 let comp_mask = require('./competencias_mask');
 let FireBase = require('firebase');
-let myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+let myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 let FlatButton = mui.FlatButton;
 let Colors = mui.Styles.Colors;
@@ -67,7 +67,7 @@ module.exports = React.createClass({
       ans: this.refs.questionario.state.ans, 
     }
      
-    myFireBaseRef.push(toDb);
+    myFireBaseRef.child(toDb['key']).set(toDb);
 
     this.setState({display:"relatorio", ans: this.refs.questionario.state.ans }, function() {
       window.scrollTo(0, 0);

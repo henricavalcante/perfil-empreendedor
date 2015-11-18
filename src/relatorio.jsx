@@ -3,7 +3,7 @@ let mui = require('material-ui');
 let queryString = require('query-string');
 
 let FireBase = require('firebase');
-let myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor');
+let myFireBaseRef = new FireBase('https://torrid-heat-308.firebaseio.com/perfil-empreendedor/data');
 
 let comp_mask = require('./competencias_mask');
 

@@ -134,18 +134,6 @@ module.exports = React.createClass({
 
     return (
         <AppCanvas>
-          <section>
-          {
-            (() => { if(!this.props.ans.length) {
-                return (
-                  <AppBar title={'Olá, '+this.state.nome}
-                    iconElementLeft={<object data={"./src/img/wiSymbol.svg"} type="image/svg+xml" width="45" height="45" />}
-                    style={{background: '#00313f'}}
-                    className="menu"/>
-                )
-              }
-            })()
-          }
             <Tabs onChange={ this.handleTabsChange }>
               <Tab label="Características" value="a">
                 <Paper style={{margin: '5vw', padding: '5vw', overflow:'auto'}}>
@@ -390,7 +378,6 @@ module.exports = React.createClass({
                 </Paper>
               </Tab>
             </Tabs>
-          </section>
         </AppCanvas>
     );
   }
